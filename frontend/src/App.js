@@ -2,7 +2,10 @@ import React, { Fragment } from "react";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 
 import Admin from "./pages/Admin";
+import Category from "./pages/Category";
+import Categories from "./pages/Categories";
 import Home from "./pages/Home";
+import Movie from "./pages/Movie";
 import Movies from "./pages/Movies";
 
 export default function App() {
@@ -20,10 +23,15 @@ export default function App() {
             <nav>
               <ul className="list-group">
                 <li className="list-group-item">
-                  <Link to="/">Home</Link>
+                  <Link exact to="/">
+                    Home
+                  </Link>
                 </li>
                 <li className="list-group-item">
                   <Link to="/movies">Movies</Link>
+                </li>
+                <li className="list-group-item">
+                  <Link to="/categories">Categories</Link>
                 </li>
                 <li className="list-group-item">
                   <Link to="/admin">Manage Catalogue</Link>
@@ -34,9 +42,17 @@ export default function App() {
 
           <div className="col-md-10">
             <Switch>
+              <Route path="/movies/:id" component={Movie} />
               <Route path="/movies">
                 <Movies />
               </Route>
+              <Route exact path="/categories">
+                <Categories />
+              </Route>
+              <Route
+                path="/categories/:category"
+                render={(props) => <Category {...props} />}
+              ></Route>
               <Route path="/admin">
                 <Admin />
               </Route>
