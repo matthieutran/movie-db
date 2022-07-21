@@ -1,37 +1,39 @@
 package main
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
-	"net/http"
+	"sync"
+
+	"github.com/matthieutran/movie-db/backend/ports"
+	"github.com/matthieutran/movie-db/backend/service"
 )
 
-const version = "1.0.0"
-
-type StatusResponse struct {
-	Status  string `json:"status"`
-	Version string `json:"version"`
-}
+const (
+	HOST = ""
+	PORT = 8080
+)
 
 func main() {
-	http.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
-		currStatus := StatusResponse{
-			Status:  "Available",
-			Version: version,
-		}
+	var wg sync.WaitGroup
 
-		js, err := json.MarshalIndent(currStatus, "", "\t")
+	// Create Context
+	ctx := context.Background()
+
+	// Create application object
+	app := service.NewApplication(ctx)
+
+	// Create HTTP Server
+	server := ports.NewHttpServer(app)
+	// Run HTTP Server in new goroutine
+	wg.Add(1)
+	go func() {
+		err := server.StartHttpServer(wg)(HOST, PORT)
 		if err != nil {
-			fmt.Println("Could not marshal status:", err)
+			fmt.Println("Could not start HTTP Server:", err)
 		}
+	}()
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write(js)
-	})
-
-	err := http.ListenAndServe(":8080", nil)
-	if err != nil {
-		fmt.Println("Could not serve HTTP server:", err)
-	}
+	// Block until servers are shut down
+	wg.Wait()
 }
